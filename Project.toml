@@ -1,0 +1,4 @@
+name = "GibbsSampler"
+uuid = "8dc8cc1e-8774-4b65-b30e-f59d34a0d623"
+authors = ["efmanu <manuedavakandam@gmail.com>"]
+version = "0.1.0"
