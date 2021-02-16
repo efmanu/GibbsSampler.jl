@@ -2,3 +2,9 @@ name = "GibbsSampler"
 uuid = "8dc8cc1e-8774-4b65-b30e-f59d34a0d623"
 authors = ["efmanu <manuedavakandam@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+MHSampler = "bd726389-b880-41da-add3-09aa2db054e6"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

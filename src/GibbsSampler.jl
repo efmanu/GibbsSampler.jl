@@ -1,5 +1,9 @@
 module GibbsSampler
 
-greet() = print("Hello World!")
+using Random
+using Distributions
+using MHSampler
+
+include("gibbs.jl")
 
 end # module
