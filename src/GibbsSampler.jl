@@ -3,13 +3,14 @@ module GibbsSampler
 using Random
 using Distributions
 using MHSampler
-using ForwardDiff
+using ForwardDiff, ReverseDiff, Tracker, Zygote
 using AdvancedHMC, AdvancedMH
 using Parameters
 
-include("gibbs.jl")
-include("struct_types.jl")
 
-export MH, adHMC, MMH
+include("struct_types.jl")
+include("gibbs.jl")
+
+export gibbs, MH, adHMC, adNUTS
 
 end # module
