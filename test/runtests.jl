@@ -17,11 +17,11 @@ using MHSampler
 	chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000)
 
 	chm = MHSampler.mhsample(proposalf, logJoint, itr = 10000)	
-	@test isapprox(mean(Array(chn[1,2:end])),mean(Array(chm[1,2:end])), atol=0.2)
+	@test isapprox(mean(Array(chn[1,2:end])),mean(Array(chm[1,2:end])), atol=0.1)
 end
 @testset "gibbs_likelihood" begin
 
-	proposal = [Normal(2.0,5.0), Normal(3.0,5.0)]
+	proposal = [Normal(0.0,5.0), Normal(0.0,5.0)]
 	function proposalf() 
 		return rand.(proposal)
 	end
@@ -38,5 +38,5 @@ end
 
 	chm = MHSampler.mhsample(proposalf, logJoint1, itr = 10000)	
 	@show mean(Array(chn[1,2:end])) mean(Array(chm[1,2:end]))
-	@test isapprox(mean(Array(chn[1,2:end])),mean(Array(chm[1,2:end])), atol=1.0)
+	@test isapprox(mean(Array(chn[1,2:end])),mean(Array(chm[1,2:end])), atol=0.7)
 end
