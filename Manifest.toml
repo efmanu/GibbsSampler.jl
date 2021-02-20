@@ -301,9 +301,9 @@ version = "0.4.5"
 
 [[MHSampler]]
 deps = ["DataFrames", "Distributions", "Random"]
-git-tree-sha1 = "94f0730efda84ec2de04a7c7e8fa31d820f12ca1"
-repo-rev = "mhad"
-repo-url = "C:\\Users\\manoos\\.julia\\dev\\MHSampler"
+git-tree-sha1 = "ff7ff424d5ef0425a30a36727d767c72c982fede"
+repo-rev = "master"
+repo-url = "https://github.com/efmanu/MHSampler.jl"
 uuid = "bd726389-b880-41da-add3-09aa2db054e6"
 version = "0.1.0"
 
