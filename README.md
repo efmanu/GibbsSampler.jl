@@ -1,5 +1,9 @@
 # GibbsSampler.jl
 
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://efmanu.github.io/GibbsSampler.jl/dev/
+[![][docs-dev-img]][docs-dev-url]
+
 This package helps to generate posterior samples using [Gibbs sampling algorithm](https://en.wikipedia.org/wiki/Gibbs_sampling) from a specified multivariate probability distribution when direct sampling is difficult.
 This Julia package supports MH and HMC based algorithms with different automatic differentiation backends.
 
