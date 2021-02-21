@@ -47,7 +47,20 @@ function proposal_sampling(step_wrapper::Function, initial_θ,
 	hamiltonian = Hamiltonian(metric, step_wrapper, ℓπ_grad)
 	initial_ϵ = find_good_stepsize(hamiltonian, initial_θ)
 	integrator = Leapfrog(initial_ϵ)
-	proposal = NUTS{MultinomialTS, GeneralisedNoUTurn}(integrator)
+	proposal = AdvancedHMC.StaticTrajectory(integrator, 1)
+	adaptor = StanHMCAdaptor(MassMatrixAdaptor(metric), StepSizeAdaptor(0.8, integrator))
+	samples, stats = AdvancedHMC.sample(hamiltonian, proposal, initial_θ, sample_alg.n_samples, adaptor, sample_alg.n_adapts, verbose =false)
+	return samples[end][1]
+end
+
+function proposal_sampling(step_wrapper::Function, initial_θ,
+	proposalDist::Distribution, sample_alg::adNUTS; D =1)
+	ℓπ_grad(θ) = return (step_wrapper(θ), sample_alg.backend.gradient(step_wrapper, θ))	
+	metric = DiagEuclideanMetric(D)
+	hamiltonian = Hamiltonian(metric, step_wrapper, ℓπ_grad)
+	initial_ϵ = find_good_stepsize(hamiltonian, initial_θ)
+	integrator = Leapfrog(initial_ϵ)
+	proposal =  AdvancedHMC.NUTS{MultinomialTS, GeneralisedNoUTurn}(integrator)
 	adaptor = StanHMCAdaptor(MassMatrixAdaptor(metric), StepSizeAdaptor(0.8, integrator))
 	samples, stats = AdvancedHMC.sample(hamiltonian, proposal, initial_θ, sample_alg.n_samples, adaptor, sample_alg.n_adapts, verbose =false)
 	return samples[end][1]
