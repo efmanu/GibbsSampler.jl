@@ -8,7 +8,7 @@ MH is a struct to choose MH MCMC sampling algorithm
 a = MH(n_samples = 4)
 """
 @with_kw struct MH
-	n_samples = 10
+	n_samples = 2
 end
 
 """
@@ -28,7 +28,7 @@ backend = ForwardDiff
 )
 """
 @with_kw struct adHMC
-	n_samples = 10
+	n_samples = 1
 	n_adapts = 5
 	backend = ForwardDiff
 end
@@ -51,7 +51,7 @@ backend = ForwardDiff
 )
 """
 @with_kw struct adNUTS
-	n_samples = 10
+	n_samples = 1
 	n_adapts = 5
 	backend = ForwardDiff
 end
