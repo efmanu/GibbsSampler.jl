@@ -6,6 +6,7 @@ using MHSampler
 using ForwardDiff, ReverseDiff, Tracker, Zygote
 using AdvancedHMC, AdvancedMH
 using Parameters
+using DataFrames
 
 
 include("struct_types.jl")

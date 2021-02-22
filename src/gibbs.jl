@@ -40,7 +40,7 @@ function gibbs(proposal::Vector{T}, logJoint::Function;
 			states["itr_$i"][idx] = param_val[idx]
 		end		
 	end
-	return states
+	return format_chain(states, burn_in, itr)
 end
 
 function proposal_sampling(step_wrapper::Function, initial_θ,

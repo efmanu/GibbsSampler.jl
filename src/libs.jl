@@ -16,5 +16,26 @@ function form_vector(param_val, idx, new_param)
 	return nw_param_val
 end
 
-function reshape_chain(states, itr)
+function format_chain(states, burn_in, itr)
+	chain =DataFrame();
+	if(!isempty(states))
+		lps = length(states["itr_1"])
+		param_names =[]
+		for ln in 1:lps
+			param_st = forward_transform(states["itr_1"][ln])
+			for ps in 1:length(param_st)
+				push!(param_names,"param[$(ln)][$(ps)]")
+			end			
+		end
+		chain.var = param_names
+		for i in (burn_in+1):itr
+			all_val =[]
+			for ln in 1:lps	
+				param_st = forward_transform(states["itr_$(i)"][ln])
+				push!(all_val, param_st...)
+			end
+			chain[!,Symbol((i-burn_in))] = all_val
+		end
+	end
+	return chain
 end
