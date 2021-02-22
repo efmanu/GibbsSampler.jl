@@ -9,6 +9,7 @@ using Parameters
 
 
 include("struct_types.jl")
+include("libs.jl")
 include("gibbs.jl")
 
 export gibbs, MH, adHMC, adNUTS

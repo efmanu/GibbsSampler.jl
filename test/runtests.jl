@@ -40,3 +40,17 @@ end
 	@show mean(Array(chn[1,2:end])) mean(Array(chm[1,2:end]))
 	@test isapprox(mean(Array(chn[1,2:end])),mean(Array(chm[1,2:end])), atol=0.7)
 end
+
+@testset "gibbs_multi" begin
+	
+	proposal = [MvNormal(rand(5),5.0), Normal(0.0,5.0), Uniform(0.0,5.0), MvNormal(rand(5),5.0)]
+
+	priors = proposal
+
+	function logJoint(params)	
+		logPrior= sum(logpdf.(priors, params))
+		return logPrior
+	end
+	sample_alg = [adHMC() for _ in 1:length(proposal)]
+	chm = gibbs(proposal, logJoint; sample_alg=sample_alg)
+end
