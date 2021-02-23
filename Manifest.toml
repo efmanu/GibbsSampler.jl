@@ -299,14 +299,6 @@ git-tree-sha1 = "95e675246b58a7cb1199a90cd50a25850ff215c7"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "0.4.5"
 
-[[MHSampler]]
-deps = ["DataFrames", "Distributions", "Random"]
-git-tree-sha1 = "ff7ff424d5ef0425a30a36727d767c72c982fede"
-repo-rev = "master"
-repo-url = "https://github.com/efmanu/MHSampler.jl"
-uuid = "bd726389-b880-41da-add3-09aa2db054e6"
-version = "0.1.0"
-
 [[MacroTools]]
 deps = ["Markdown", "Random"]
 git-tree-sha1 = "6a8a2a625ab0dea913aba95c11370589e0239ff0"

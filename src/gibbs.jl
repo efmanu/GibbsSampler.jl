@@ -29,7 +29,6 @@ function gibbs(proposal::Vector{T}, logJoint::Function;
 				nw_param_val = [param_val[1:idx-1]..., reverse_transform(new_param), param_val[idx+1:end]...]
 				return logJoint(nw_param_val)
 			end	
-			global g_wrapper = step_wrapper
 			if i == 1
 				initial_θ = rand(val)
 			else
