@@ -18,6 +18,7 @@ To generate posterior samples using Gibbs sampling algorithm
 """
 function gibbs(proposal::Vector{T}, logJoint::Function; 
 	sample_alg = [MH() for _ in 1:length(proposal)], 
+	revt = [reverse_transform for _ in 1:length(proposal)]
 	itr = 100, burn_in = Int(round(itr*0.2))
 ) where {T <: Distribution}
 	states = Dict()
@@ -26,7 +27,7 @@ function gibbs(proposal::Vector{T}, logJoint::Function;
 		states["itr_$i"] =  copy(param_val)
 		for (idx,val) in enumerate(proposal)
 			function step_wrapper(new_param)
-				nw_param_val = [param_val[1:idx-1]..., reverse_transform(new_param), param_val[idx+1:end]...]
+				nw_param_val = [param_val[1:idx-1]..., revt[idx](new_param), param_val[idx+1:end]...]
 				return logJoint(nw_param_val)
 			end	
 			if i == 1
@@ -34,7 +35,7 @@ function gibbs(proposal::Vector{T}, logJoint::Function;
 			else
 				initial_θ = states["itr_$(i-1)"][idx]
 			end			
-			param_val[idx] = reverse_transform(proposal_sampling(step_wrapper, initial_θ, val, sample_alg[idx]))
+			param_val[idx] = revt[idx](proposal_sampling(step_wrapper, initial_θ, val, sample_alg[idx]))
 
 			states["itr_$i"][idx] = param_val[idx]
 		end		

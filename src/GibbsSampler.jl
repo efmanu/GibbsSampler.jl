@@ -2,7 +2,6 @@ module GibbsSampler
 
 using Random
 using Distributions
-using MHSampler
 using ForwardDiff, ReverseDiff, Tracker, Zygote
 using AdvancedHMC, AdvancedMH
 using Parameters
