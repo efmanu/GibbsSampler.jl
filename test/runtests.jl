@@ -55,4 +55,5 @@ end
 
 	@show mean(Array(chn[1,2:end])) mean(chm[:μ])
 	@test isapprox(mean(Array(chn[1,2:end])),mean(chm[:μ]), atol=0.5)
+
 end
