@@ -18,7 +18,7 @@ To generate posterior samples using Gibbs sampling algorithm
 """
 function gibbs(proposal::Vector{T}, logJoint::Function; 
 	sample_alg = [MH() for _ in 1:length(proposal)], 
-	revt = [reverse_transform for _ in 1:length(proposal)]
+	revt = [reverse_transform for _ in 1:length(proposal)],
 	itr = 100, burn_in = Int(round(itr*0.2))
 ) where {T <: Distribution}
 	states = Dict()
