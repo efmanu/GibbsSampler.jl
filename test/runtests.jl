@@ -1,4 +1,6 @@
 using Test
+using AdvancedMH
+using MCMCChains
 using GibbsSampler
 using Distributions
 using MHSampler
@@ -21,7 +23,7 @@ using MHSampler
 end
 @testset "gibbs_likelihood" begin
 
-	proposal = [Normal(0.0,5.0), Normal(0.0,5.0)]
+	proposal = [Normal(1.0,5.0), Normal(0.0,5.0)]
 	function proposalf() 
 		return rand.(proposal)
 	end

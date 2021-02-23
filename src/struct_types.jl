@@ -28,7 +28,7 @@ backend = ForwardDiff
 )
 """
 @with_kw struct adHMC
-	n_samples = 1
+	n_samples = 2
 	n_adapts = 5
 	backend = ForwardDiff
 end
@@ -51,7 +51,7 @@ backend = ForwardDiff
 )
 """
 @with_kw struct adNUTS
-	n_samples = 1
+	n_samples = 2
 	n_adapts = 5
 	backend = ForwardDiff
 end
