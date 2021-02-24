@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Comparison · GibbsSampler.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">GibbsSampler.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../structs/">Sampling Algorithm</a></li><li><a class="tocitem" href="../examples/">Examples</a></li><li class="is-active"><a class="tocitem" href>Comparison</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Comparison</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Comparison</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/efmanu/GibbsSampler.jl/blob/master/docs/src/compare.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Comparison-with-[AdvancedHMC.jl](https://github.com/TuringLang/AdvancedHMC.jl)"><a class="docs-heading-anchor" href="#Comparison-with-[AdvancedHMC.jl](https://github.com/TuringLang/AdvancedHMC.jl)">Comparison with <a href="https://github.com/TuringLang/AdvancedHMC.jl">AdvancedHMC.jl</a></a><a id="Comparison-with-[AdvancedHMC.jl](https://github.com/TuringLang/AdvancedHMC.jl)-1"></a><a class="docs-heading-anchor-permalink" href="#Comparison-with-[AdvancedHMC.jl](https://github.com/TuringLang/AdvancedHMC.jl)" title="Permalink"></a></h1><h3 id="Comparison-1"><a class="docs-heading-anchor" href="#Comparison-1">Comparison 1</a><a id="Comparison-1-1"></a><a class="docs-heading-anchor-permalink" href="#Comparison-1" title="Permalink"></a></h3><p>This example compares the mean of samples generated using <strong>Gibbs</strong> and <strong>AdvancedMH</strong> sampling methods. There is two parameters in this examples with proposal distribution of <code>P1 ~ Normal(2.0,3.0)</code> and <code>P2 ~  Normal(3.0,3.0)</code>. Moreover, there is no likelihood function involved in the calculation of log joint probability.</p><pre><code class="language-julia">#use packages
+using AdvancedMH
+using MCMCChains
+using GibbsSampler
+using Distributions
+
+#define prior and proposal distributions
+proposal = [Normal(2.0,3.0), Normal(3.0,3.0)]
+priors = proposal
+
+#log of joint probability
+function logJoint(params)	
+	logPrior= sum(logpdf.(priors, params))
+	return logPrior
+end
+
+# Construct a DensityModel for advanced MH.
+mdl = DensityModel(logJoint)
+
+# Set up our sampler with a joint multivariate Normal proposal for advanced MH.
+spl = RWMH(MvNormal([2.0,3.0],3.0))
+
+# Sample from the posterior using Advanced MH.
+chm = sample(mdl, spl, 100000; param_names=[&quot;μ&quot;, &quot;σ&quot;], chain_type=Chains)
+
+# Sample from the posterior using Gibbs sampler.
+chn = GibbsSampler.gibbs(proposal, logJoint;itr = 100000)
+
+@show mean(Array(chn[1,2:end])) mean(chm[:μ]) </code></pre><p>The results are as below:</p><pre><code class="language-julia">mean(Array(chn[1, 2:end])) = 5.948891814566478
+mean(chm[:μ]) = 5.916400133962066
+</code></pre><h3 id="Comparison-2"><a class="docs-heading-anchor" href="#Comparison-2">Comparison 2</a><a id="Comparison-2-1"></a><a class="docs-heading-anchor-permalink" href="#Comparison-2" title="Permalink"></a></h3><p>The only difference from the <strong>Example1</strong> is the introduction likelihood function to calculate the joint probability.</p><pre><code class="language-julia">#Define  the prior and proposal distribution
+proposal = [Normal(1.0,5.0), Normal(0.0,5.0)]
+priors = proposal
+
+#Define the model
+model(z) = z[1] + z[2]
+output = 5.0
+
+#Function to calculate log joint probability
+function logJoint1(params)	
+	logPrior= sum(logpdf.(priors, params))
+	logLikelihood = logpdf(Normal(model(params)), output)
+	return logPrior + logLikelihood
+end
+
+# Construct a DensityModel for advanced MH.
+mdl1 = DensityModel(logJoint1)
+
+# Set up our sampler with a joint multivariate Normal proposal for advanced MH.
+spl1 = RWMH(MvNormal([1.0,0.0],5.0))
+
+# Sample from the posterior using advanced MH.
+chm = sample(mdl1, spl1, 100000; param_names=[&quot;μ&quot;, &quot;σ&quot;], chain_type=Chains)
+
+# Sample from the posterior using Gibbs Sampler.
+chn = GibbsSampler.gibbs(proposal, logJoint1;itr = 100000)
+
+@show mean(Array(chn[1,2:end])) mean(chm[:μ])</code></pre><p>The results are as below:</p><pre><code class="language-julia">mean(Array(chn[1, 2:end])) = 3.9480667426375584
+mean(chm[:μ]) = 4.073099811056996
+</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples/">« Examples</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 24 February 2021 17:05">Wednesday 24 February 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
