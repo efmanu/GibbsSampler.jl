@@ -7,7 +7,9 @@ makedocs(
     doctest = true,
     pages = [
         "Home" => "index.md",
-        "Sampling Algorithm" => "structs.md"
+        "Sampling Algorithm" => "structs.md",
+        "Examples" => "examples.md",
+        "Comparison" => "compare.md"
     ]
 )
 
