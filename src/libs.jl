@@ -16,6 +16,20 @@ function form_vector(param_val, idx, new_param)
 	return nw_param_val
 end
 
+function check_sample_alg(alg, sample_alg)
+	len_s = length(sample_alg)
+	val = Array{Any}(undef,len_s)
+	for loc in 1:len_s
+		if (!isassigned(sample_alg[loc],2)) && (alg[sample_alg[loc][1]] isa MH)
+			throw("Error: MH sampler requires a proposal distribution")
+		elseif ((alg[sample_alg[loc][1]] isa adHMC) || (alg[sample_alg[loc][1]] isa adNUTS)) && ((!isassigned(sample_alg[loc],2)))
+			val[loc] = Normal(0.0,1.0)
+		else
+			val[loc] = sample_alg[loc][2]
+		end
+	end
+	return val
+end
 function format_chain(states, burn_in, itr; chain_type=:default)
 	chain =DataFrame();
 	if(!isempty(states))

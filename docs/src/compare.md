@@ -12,8 +12,7 @@ using Distributions
 using StatsPlots
 
 #define prior and proposal distributions
-proposal = [Normal(2.0,3.0), Normal(3.0,3.0)]
-priors = proposal
+priors = [Normal(2.0,3.0), Normal(3.0,3.0)]
 
 #log of joint probability
 function logJoint(params)	
@@ -30,9 +29,15 @@ spl = RWMH(MvNormal([2.0,3.0],3.0))
 # Sample from the posterior using Advanced MH.
 chm = sample(mdl, spl, 100000; param_names=["μ", "σ"], chain_type=Chains)
 
+#define MCMC sampling algorithm
+alg = [MH()]
+sample_alg =Dict(
+	1 => [1, Normal(2.0,3.0)],
+	2 => [1, Normal(3.0,3.0)]
+)
 
 # Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint;itr = 100000, chain_type = :mcmcchain)
+chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 100000, chain_type = :mcmcchain)
 
 ```
 
@@ -53,8 +58,7 @@ The only difference from the **Example1** is the introduction likelihood functio
 
 ```julia
 #Define  the prior and proposal distribution
-proposal = [Normal(1.0,5.0), Normal(0.0,5.0)]
-priors = proposal
+priors = [Normal(1.0,5.0), Normal(0.0,5.0)]
 
 #Define the model
 model(z) = z[1] + z[2]
@@ -76,15 +80,23 @@ spl1 = RWMH(MvNormal([1.0,0.0],5.0))
 # Sample from the posterior using advanced MH.
 chm = sample(mdl1, spl1, 100000; param_names=["μ", "σ"], chain_type=Chains)
 
-# Sample from the posterior using Gibbs Sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint1;itr = 100000)
 
-@show mean(Array(chn[1,2:end])) mean(chm[:μ])
+#define MCMC sampling algorithm
+alg = [MH()]
+sample_alg =Dict(
+	1 => [1, Normal(1.0,5.0)],
+	2 => [1, Normal(0.0,5.0)]
+)
+
+# Sample from the posterior using Gibbs sampler.
+chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 100000, chain_type = :mcmcchain)
+
+@show mean(chn["param[1][1]"]) mean(chm[:μ])
 ```
 
 The results are as below:
 ```julia
-mean(Array(chn[1, 2:end])) = 3.9480667426375584
-mean(chm[:μ]) = 4.073099811056996
+mean(chn["param[1][1]"]) = 3.018838279341398
+mean(chm[:μ]) = 3.9580733435017885
 
 ```
