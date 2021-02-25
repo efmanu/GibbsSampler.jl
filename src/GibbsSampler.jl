@@ -6,6 +6,7 @@ using ForwardDiff, ReverseDiff, Tracker, Zygote
 using AdvancedHMC, AdvancedMH
 using Parameters
 using DataFrames
+using MCMCChains, ProgressMeter
 
 
 include("struct_types.jl")

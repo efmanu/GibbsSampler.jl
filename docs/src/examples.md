@@ -27,7 +27,7 @@ function logJoint(params)
 	return logPrior
 end
 # Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000, sample_alg=sample_alg)
+chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000, sample_alg=sample_alg, chain_type = :mcmcchain)
 ```
 ### Use of AdvancedHMC as MCMC sampler
 The `adHMC()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/GibbsSampler.jl) package is used to select MCMC sampler for each parameter in Gibbs sampling. 
@@ -48,7 +48,7 @@ The `adNUTS()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/G
 sample_alg = [adNUTS() for _ in 1:length(proposal)]
 
 # Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000, sample_alg=sample_alg)
+chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000, sample_alg=sample_alg, chain_type = :mcmcchain)
 ```
 
 ### Use of different MCMC sampler for each parameter
@@ -58,5 +58,5 @@ chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000, sample_alg=sample_alg)
 sample_alg = [adNUTS(), MH()]
 
 # Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000, sample_alg=sample_alg)
+chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000, sample_alg=sample_alg, chain_type = :mcmcchain)
 ```

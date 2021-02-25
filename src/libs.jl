@@ -16,7 +16,7 @@ function form_vector(param_val, idx, new_param)
 	return nw_param_val
 end
 
-function format_chain(states, burn_in, itr)
+function format_chain(states, burn_in, itr; chain_type=:default)
 	chain =DataFrame();
 	if(!isempty(states))
 		lps = length(states["itr_1"])
@@ -35,6 +35,13 @@ function format_chain(states, burn_in, itr)
 				push!(all_val, param_st...)
 			end
 			chain[!,Symbol((i-burn_in))] = all_val
+		end
+		if(chain_type == :default)
+			return chain
+		elseif(chain_type == :mcmcchain)
+			return Chains(Matrix{Float64}(Array(chain[:,2:end])'), param_names)
+		else
+			throw("Error: Chain type not found")
 		end
 	end
 	return chain

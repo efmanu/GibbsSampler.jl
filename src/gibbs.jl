@@ -1,8 +1,9 @@
 """
-	function gibbs(proposal::Vector{T}, logJoint::Function; 
+	gibbs(proposal::Vector{T}, logJoint::Function; 
 		sample_alg = [MH() for _ in 1:length(proposal)], 
 		revt = [reverse_transform for _ in 1:length(proposal)],
-		itr = 100, burn_in = Int(round(itr*0.2))
+		itr = 100, burn_in = Int(round(itr*0.2)),
+		chain_type=:default, progress = true
 	) where {T <: Distribution}
 
 To generate posterior samples using Gibbs sampling algorithm
@@ -14,17 +15,29 @@ To generate posterior samples using Gibbs sampling algorithm
 - sample_alg 	:MCMC sampling for each parameter
 - itr 			:Number of iterations
 - burn_in 		:Burn in from samples
+- chain_type	:Sample chain type. default value is `:default`. Samples chains formated using `MCMCChain.jl`
+by choosing `chain_type` as `:mcmcchain`
+- progress 		:To show the sampling progress. Default value is `true`.
 # Output
 - chn 			:Generated samples
 """
 function gibbs(proposal::Vector{T}, logJoint::Function; 
 	sample_alg = [MH() for _ in 1:length(proposal)], 
 	revt = [reverse_transform for _ in 1:length(proposal)],
-	itr = 100, burn_in = Int(round(itr*0.2))
+	itr = 100, burn_in = Int(round(itr*0.2)),
+	chain_type=:default, progress = true
 ) where {T <: Distribution}
 	states = Dict()
 	param_val = copy(rand.(proposal))
+	if progress
+		prog = Progress(itr, dt=0.5,
+	             barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',),
+	             barlen=50)
+	end
 	for i in 1:itr
+		if progress
+			ProgressMeter.next!(prog)
+		end
 		states["itr_$i"] =  copy(param_val)
 		for (idx,val) in enumerate(proposal)
 			function step_wrapper(new_param)
@@ -41,7 +54,10 @@ function gibbs(proposal::Vector{T}, logJoint::Function;
 			states["itr_$i"][idx] = param_val[idx]
 		end		
 	end
-	return format_chain(states, burn_in, itr)
+	if progress
+		ProgressMeter.finish!(prog)
+	end
+	return format_chain(states, burn_in, itr, chain_type=chain_type)
 end
 
 function proposal_sampling(step_wrapper::Function, initial_θ,

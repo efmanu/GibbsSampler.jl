@@ -9,6 +9,7 @@ using AdvancedMH
 using MCMCChains
 using GibbsSampler
 using Distributions
+using StatsPlots
 
 #define prior and proposal distributions
 proposal = [Normal(2.0,3.0), Normal(3.0,3.0)]
@@ -29,19 +30,22 @@ spl = RWMH(MvNormal([2.0,3.0],3.0))
 # Sample from the posterior using Advanced MH.
 chm = sample(mdl, spl, 100000; param_names=["μ", "σ"], chain_type=Chains)
 
-# Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint;itr = 100000)
 
-@show mean(Array(chn[1,2:end])) mean(chm[:μ]) 
+# Sample from the posterior using Gibbs sampler.
+chn = GibbsSampler.gibbs(proposal, logJoint;itr = 100000, chain_type = :mcmcchain)
+
 ```
 
 The results are as below:
 
 ```julia
-mean(Array(chn[1, 2:end])) = 5.948891814566478
-mean(chm[:μ]) = 5.916400133962066
-
+plot(chm)
 ```
+![Samples generated using AdvancedMH.jl](assets/chm1.png)
+```julia
+plot(chn)
+```
+![Samples generated using GibbsSampler.jl](assets/chn1.png)
 
 ### Comparison 2
 
