@@ -7,8 +7,7 @@ using Distributions
 using StatsPlots
 
 #define prior and proposal distributions
-proposal = [Normal(2.0,3.0), Normal(3.0,3.0)]
-priors = proposal
+priors = [Normal(2.0,3.0), Normal(3.0,3.0)]
 
 #log of joint probability
 function logJoint(params)	
@@ -25,12 +24,17 @@ spl = RWMH(MvNormal([2.0,3.0],3.0))
 # Sample from the posterior using Advanced MH.
 chm = sample(mdl, spl, 100000; param_names=[&quot;μ&quot;, &quot;σ&quot;], chain_type=Chains)
 
+#define MCMC sampling algorithm
+alg = [MH()]
+sample_alg =Dict(
+	1 =&gt; [1, Normal(2.0,3.0)],
+	2 =&gt; [1, Normal(3.0,3.0)]
+)
 
 # Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint;itr = 100000, chain_type = :mcmcchain)
+chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 100000, chain_type = :mcmcchain)
 </code></pre><p>The results are as below:</p><pre><code class="language-julia">plot(chm)</code></pre><p><img src="../assets/chm1.png" alt="Samples generated using AdvancedMH.jl"/></p><pre><code class="language-julia">plot(chn)</code></pre><p><img src="../assets/chn1.png" alt="Samples generated using GibbsSampler.jl"/></p><h3 id="Comparison-2"><a class="docs-heading-anchor" href="#Comparison-2">Comparison 2</a><a id="Comparison-2-1"></a><a class="docs-heading-anchor-permalink" href="#Comparison-2" title="Permalink"></a></h3><p>The only difference from the <strong>Example1</strong> is the introduction likelihood function to calculate the joint probability.</p><pre><code class="language-julia">#Define  the prior and proposal distribution
-proposal = [Normal(1.0,5.0), Normal(0.0,5.0)]
-priors = proposal
+priors = [Normal(1.0,5.0), Normal(0.0,5.0)]
 
 #Define the model
 model(z) = z[1] + z[2]
@@ -52,9 +56,17 @@ spl1 = RWMH(MvNormal([1.0,0.0],5.0))
 # Sample from the posterior using advanced MH.
 chm = sample(mdl1, spl1, 100000; param_names=[&quot;μ&quot;, &quot;σ&quot;], chain_type=Chains)
 
-# Sample from the posterior using Gibbs Sampler.
-chn = GibbsSampler.gibbs(proposal, logJoint1;itr = 100000)
 
-@show mean(Array(chn[1,2:end])) mean(chm[:μ])</code></pre><p>The results are as below:</p><pre><code class="language-julia">mean(Array(chn[1, 2:end])) = 3.9480667426375584
-mean(chm[:μ]) = 4.073099811056996
-</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples/">« Examples</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 25 February 2021 14:11">Thursday 25 February 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+#define MCMC sampling algorithm
+alg = [MH()]
+sample_alg =Dict(
+	1 =&gt; [1, Normal(1.0,5.0)],
+	2 =&gt; [1, Normal(0.0,5.0)]
+)
+
+# Sample from the posterior using Gibbs sampler.
+chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 100000, chain_type = :mcmcchain)
+
+@show mean(chn[&quot;param[1][1]&quot;]) mean(chm[:μ])</code></pre><p>The results are as below:</p><pre><code class="language-julia">mean(chn[&quot;param[1][1]&quot;]) = 3.018838279341398
+mean(chm[:μ]) = 3.9580733435017885
+</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples/">« Examples</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 25 February 2021 18:13">Thursday 25 February 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
