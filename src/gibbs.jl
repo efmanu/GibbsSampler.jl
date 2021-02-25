@@ -36,7 +36,7 @@ function gibbs(proposal::Vector{T}, logJoint::Function;
 	end
 	for i in 1:itr
 		if progress
-			ProgressMeter.next!(prog)
+			ProgressMeter.next!(prog, showvalues = [(:iter,i), (:samples, param_val)])
 		end
 		states["itr_$i"] =  copy(param_val)
 		for (idx,val) in enumerate(proposal)
