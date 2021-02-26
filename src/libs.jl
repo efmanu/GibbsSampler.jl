@@ -20,12 +20,16 @@ function check_sample_alg(alg, sample_alg)
 	len_s = length(sample_alg)
 	val = Array{Any}(undef,len_s)
 	for loc in 1:len_s
-		if (!isassigned(sample_alg[loc],2)) && (alg[sample_alg[loc][1]] isa MH)
+		if (!isassigned(sample_alg[loc],3)) && (alg[sample_alg[loc][1]] isa MH)
 			throw("Error: MH sampler requires a proposal distribution")
-		elseif ((alg[sample_alg[loc][1]] isa adHMC) || (alg[sample_alg[loc][1]] isa adNUTS)) && ((!isassigned(sample_alg[loc],2)))
-			val[loc] = Normal(0.0,1.0)
+		elseif ((alg[sample_alg[loc][1]] isa adHMC) || (alg[sample_alg[loc][1]] isa adNUTS)) && ((!isassigned(sample_alg[loc],3)))
+			if sample_alg[loc][2] == 1
+				val[loc] = Normal(0.0,1.0)
+			else
+				val[loc] = MvNormal(zeros(sample_alg[loc][2]),1.0)
+			end			
 		else
-			val[loc] = sample_alg[loc][2]
+			val[loc] = sample_alg[loc][3]
 		end
 	end
 	return val

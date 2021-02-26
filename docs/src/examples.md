@@ -23,8 +23,8 @@ function logJoint(params)
 end
 alg = [MH()]
 sample_alg =Dict(
-	1 => [1, Normal(2.0,3.0)],
-	2 => [1, Normal(3.0,3.0)]
+	1 => [1, 1, Normal(2.0,3.0)],
+	2 => [1, 1, Normal(3.0,3.0)]
 )
 # Sample from the posterior using Gibbs sampler.
 chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 10000, chain_type = :mcmcchain)
@@ -51,8 +51,8 @@ The `adNUTS()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/G
 #select MCMC sampler as vector with adNUTS() struct with same length of proposal distribution
 alg = [adNUTS()]
 sample_alg =Dict(
-	1 => [1],
-	2 => [1]
+	1 => [1,1],
+	2 => [1,1]
 )
 
 # Sample from the posterior using Gibbs sampler.
@@ -65,8 +65,8 @@ chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 10000, chain_type = :mc
 #select MCMC sampler as vector the same length of proposal distribution
 alg = [adNUTS(), MH()]
 sample_alg =Dict(
-	1 => [1],
-	2 => [2, Normal(0.0,1.0)]
+	1 => [1,1],
+	2 => [2, 1, Normal(0.0,1.0)]
 )
 
 # Sample from the posterior using Gibbs sampler.

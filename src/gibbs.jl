@@ -8,64 +8,62 @@
 To generate posterior samples using Gibbs sampling algorithm
 
 # Inputs
-- alg 			:MCMC algorithms based on structs defined in this package as vector eg: alg = [MH()]
-- sample_alg 	:A dictionary maps `alg` to parameter groups index and it contains proposal distribution
+- `alg` 			:MCMC algorithms based on structs defined in this package as vector eg: `alg = [MH()]`
+- `sample_alg` 		:A dictionary maps `alg` to parameter groups index and it contains proposal distribution
 if required by the sampling algorithm. 
-Eg: sample_alg =Dict(
-	1 => [1, Normal(2.0,3.0)],
-	2 => [1, Normal(3.0,3.0)]
-)
+
+Eg: `sample_alg =Dict(1 => [1, Normal(2.0,3.0)],2 => [1, Normal(3.0,3.0)])`
+
 Here key is the paramter group and first index in the value (Vector) maps to `alg` index. Second index in the `sample_alg`
 is the proposal distribution. This not mandatory.
-- logJoint 		:Log PDF as a function
+
+- `logJoint` 		:Log PDF as a function
 # Keyword Arguments
-- itr 			:Number of iterations
-- burn_in 		:Burn in from samples
-- chain_type	:Sample chain type. default value is `:default`. Samples chains formated using `MCMCChain.jl`
+- `itr` 			:Number of iterations
+- `burn_in` 		:Burn in from samples
+- `chain_type`	:Sample chain type. default value is `:default`. Samples chains formated using `MCMCChain.jl`
 by choosing `chain_type` as `:mcmcchain`
-- progress 		:To show the sampling progress. Default value is `true`.
+- `progress` 		:To show the sampling progress. Default value is `true`.
 # Output
-- chn 			:Generated samples
+- `chn `			:Generated samples
 """
 function gibbs(alg, sample_alg, logJoint::Function;  
 	revt = [reverse_transform for _ in 1:length(sample_alg)],
 	itr = 100, burn_in = Int(round(itr*0.2)),
 	chain_type=:default, progress = true
 ) where {T <: Distribution}
-	states = Dict()
-	lens = length(sample_alg)
-	param_val = copy(rand(lens))
 	if progress
 		prog = Progress(itr, dt=0.5,
 	             barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',),
 	             barlen=50)
 	end
 	val = check_sample_alg(alg, sample_alg)
+	states = Dict()
+	lens = length(sample_alg)
+	param_val = copy(rand.(val))
+	states["itr_$(0)"] = copy(param_val)
 	for i in 1:itr
 		if progress
 			ProgressMeter.next!(prog, showvalues = [(:iter,i), (:samples, param_val)])
-		end
-		states["itr_$i"] =  copy(param_val)
+		end		
 		for idx in 1:lens
+			itr_loc = lens*(i-1)+idx
 			function step_wrapper(new_param)
 				nw_param_val = [param_val[1:idx-1]..., revt[idx](new_param), param_val[idx+1:end]...]
 				return logJoint(nw_param_val)
 			end	
+			initial_θ = states["itr_$(itr_loc-1)"][idx]
 
-			if i == 1
-				initial_θ = rand(val[idx])
-			else
-				initial_θ = states["itr_$(i-1)"][idx]
-			end			
 			param_val[idx] = revt[idx](proposal_sampling(step_wrapper, initial_θ, val[idx], alg[sample_alg[idx][1]]))
 
-			states["itr_$i"][idx] = param_val[idx]
+			states["itr_$(itr_loc)"] = copy(param_val)
 		end		
 	end
 	if progress
 		ProgressMeter.finish!(prog)
 	end
-	return format_chain(states, burn_in, itr, chain_type=chain_type)
+	delete!(states, 0)
+	return format_chain(states, Int(round(itr*lens*0.2)), itr*lens, chain_type=chain_type)
 end
 
 function proposal_sampling(step_wrapper::Function, initial_θ,

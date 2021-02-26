@@ -32,8 +32,8 @@ chm = sample(mdl, spl, 100000; param_names=["μ", "σ"], chain_type=Chains)
 #define MCMC sampling algorithm
 alg = [MH()]
 sample_alg =Dict(
-	1 => [1, Normal(2.0,3.0)],
-	2 => [1, Normal(3.0,3.0)]
+	1 => [1, 1, Normal(2.0,3.0)],
+	2 => [1, 1, Normal(3.0,3.0)]
 )
 
 # Sample from the posterior using Gibbs sampler.
@@ -84,8 +84,8 @@ chm = sample(mdl1, spl1, 100000; param_names=["μ", "σ"], chain_type=Chains)
 #define MCMC sampling algorithm
 alg = [MH()]
 sample_alg =Dict(
-	1 => [1, Normal(1.0,5.0)],
-	2 => [1, Normal(0.0,5.0)]
+	1 => [1, 1, Normal(1.0,5.0)],
+	2 => [1, 1, Normal(0.0,5.0)]
 )
 
 # Sample from the posterior using Gibbs sampler.
