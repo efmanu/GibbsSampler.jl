@@ -16,7 +16,7 @@ function form_vector(param_val, idx, new_param)
 	return nw_param_val
 end
 
-function check_sample_alg(alg, sample_alg)
+function extract_sample_alg(alg, sample_alg)
 	len_s = length(sample_alg)
 	val = Array{Any}(undef,len_s)
 	for loc in 1:len_s
@@ -63,4 +63,58 @@ function format_chain(states, burn_in, itr; chain_type=:default)
 		end
 	end
 	return chain
+end
+function reform_data(samples, initial_θ)
+	if length(samples) == 1
+		return samples[1]
+	else
+		single_vec = []
+		start = 1
+		for (idx,val) in enumerate(initial_θ)
+			len = length(val)
+			if len == 1
+				new_val = samples[start]
+			else
+				new_val = reshape(samples[start:start+len-1], size(initial_θ[idx]))
+			end		
+			push!(single_vec, new_val)
+			start += len
+		end
+		return single_vec
+	end
+end
+function find_var_count(sample_alg)
+	g = 0
+	for gx in 1:sample_alg[:n_grp]
+		g += sample_alg[gx][:n_vars]
+	end
+	return g
+end
+function generate_ini_paramval(sample_alg)
+	param_val = []
+	param_proposal =[]
+	for gx in 1:sample_alg[:n_grp]
+		for px in 1:sample_alg[gx][:n_vars]
+			if haskey(sample_alg[gx][px], :proposal)
+				push!(param_val, rand(sample_alg[gx][px][:proposal]))
+				push!(param_proposal,sample_alg[gx][px][:proposal])
+			else
+				if sample_alg[gx][px][:n_eles] == 1
+					push!(param_val, rand(Normal(0.0,1.0)))
+					push!(param_proposal,Normal(0.0,1.0))
+				else
+					push!(param_val, rand(MvNormal(zeros(sample_alg[gx][px][:n_eles]),1.0)))
+					push!(param_proposal,MvNormal(zeros(sample_alg[gx][px][:n_eles]),1.0))
+				end
+			end			
+		end
+	end
+	return param_val, param_proposal
+end
+function form_single_vec(param_val)
+	single_vec = []
+	for (idx,val) in enumerate(param_val)
+		append!(single_vec, val...)
+	end
+	return single_vec
 end

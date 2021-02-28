@@ -2,101 +2,192 @@
 
 ### Comparison 1
 
-This example compares the mean of samples generated using **Gibbs** and **AdvancedMH** sampling methods. There is two parameters in this examples with proposal distribution of ` P1 ~ Normal(2.0,3.0)` and `P2 ~  Normal(3.0,3.0)`. Moreover, there is no likelihood function involved in the calculation of log joint probability.
+This example compares the mean of samples generated using **Gibbs** and **AdvancedMH** sampling methods. Only one group of parameter is considered with one parameter in this group. The proposal distribution of parameter is chosen as `MvNormal(zeros(2),1.0)` and sampled uisng `MH` sampler to sample independently.
+
 ```julia
 #use packages
-using AdvancedMH
-using MCMCChains
-using GibbsSampler
-using Distributions
-using StatsPlots
+using GibbsSampler, Distributions
+using AdvancedMH, MCMCChains
 
-#define prior and proposal distributions
-priors = [Normal(2.0,3.0), Normal(3.0,3.0)]
+#define MCMC samplers
 
-#log of joint probability
-function logJoint(params)	
-	logPrior= sum(logpdf.(priors, params))
-	return logPrior
-end
+alg = [MH(), adHMC()]
 
-# Construct a DensityModel for advanced MH.
-mdl = DensityModel(logJoint)
-
-# Set up our sampler with a joint multivariate Normal proposal for advanced MH.
-spl = RWMH(MvNormal([2.0,3.0],3.0))
-
-# Sample from the posterior using Advanced MH.
-chm = sample(mdl, spl, 100000; param_names=["μ", "σ"], chain_type=Chains)
-
-#define MCMC sampling algorithm
-alg = [MH()]
-sample_alg =Dict(
-	1 => [1, 1, Normal(2.0,3.0)],
-	2 => [1, 1, Normal(3.0,3.0)]
+#define variable groups and sampling methods
+sample_alg = Dict(
+	:n_grp => 1,
+	1 => Dict(
+		:type => :ind,
+		:n_vars => 1,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2,
+			:alg => 1
+		)
+	)
 )
+prior = [MvNormal([2.0,3.0],1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 
-# Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 100000, chain_type = :mcmcchain)
+
+proposalmh = [MvNormal(zeros(2),1.0)]
+model = DensityModel(logJoint)
+spl = RWMH(proposalmh)
+chain = sample(model, spl, 10000; chain_type=Vector{NamedTuple})
+
+#show nmean of each elements
+p1 = [chain[i][:param_1][1] for i in 1:length(chain)]
+@show mean(p1) mean(chn["param[1][1]"])
+```
+```
+mean(p1) = 2.0386819762387196
+mean(chn["param[1][1]"]) = 1.9957525645926026
+1.9957525645926026
 
 ```
-
-The results are as below:
-
 ```julia
-plot(chm)
+p2 = [chain[i][:param_1][2] for i in 1:length(chain)]
+@show mean(p2) mean(chn["param[1][2]"])
 ```
-![Samples generated using AdvancedMH.jl](assets/chm1.png)
-```julia
-plot(chn)
 ```
-![Samples generated using GibbsSampler.jl](assets/chn1.png)
+mean(p2) = 3.003012417905884
+mean(chn["param[1][2]"]) = 3.0387702707202373
+3.0387702707202373
+```
 
 ### Comparison 2
 
-The only difference from the **Example1** is the introduction likelihood function to calculate the joint probability.
+This example compares the mean of samples generated using **Gibbs** and **AdvancedMH** sampling methods. Only one group of parameter is considered with two parameters. The proposal distribution of parameters are chosen as `MvNormal(zeros(2),1.0)`, `Normal(0.0,1.0)` respectively and sampled uisng `MH` sampler and sampled independently.
 
 ```julia
-#Define  the prior and proposal distribution
-priors = [Normal(1.0,5.0), Normal(0.0,5.0)]
-
-#Define the model
-model(z) = z[1] + z[2]
-output = 5.0
-
-#Function to calculate log joint probability
-function logJoint1(params)	
-	logPrior= sum(logpdf.(priors, params))
-	logLikelihood = logpdf(Normal(model(params)), output)
-	return logPrior + logLikelihood
-end
-
-# Construct a DensityModel for advanced MH.
-mdl1 = DensityModel(logJoint1)
-
-# Set up our sampler with a joint multivariate Normal proposal for advanced MH.
-spl1 = RWMH(MvNormal([1.0,0.0],5.0))
-
-# Sample from the posterior using advanced MH.
-chm = sample(mdl1, spl1, 100000; param_names=["μ", "σ"], chain_type=Chains)
-
-
-#define MCMC sampling algorithm
-alg = [MH()]
-sample_alg =Dict(
-	1 => [1, 1, Normal(1.0,5.0)],
-	2 => [1, 1, Normal(0.0,5.0)]
+sample_alg = Dict(
+	:n_grp => 1,
+	1 => Dict(
+		:type => :ind,
+		:n_vars => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2,
+			:alg => 1
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1,
+			:alg => 1
+		)
+	)
 )
+prior = [MvNormal([2.0,3.0],1.0), Normal(4.0, 1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 
-# Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 100000, chain_type = :mcmcchain)
+proposalmh = [MvNormal(zeros(2),1.0), Normal(0.0,1.0)]
+model = DensityModel(logJoint)
+spl = RWMH(proposalmh)
+chain = sample(model, spl, 10000; chain_type=Vector{NamedTuple})
+p1 = [chain[i][:param_1][1] for i in 1:length(chain)]
+@show mean(p1) mean(chn["param[1][1]"])
 
-@show mean(chn["param[1][1]"]) mean(chm[:μ])
+p2 = [chain[i][:param_1][2] for i in 1:length(chain)]
+@show mean(p2) mean(chn["param[1][2]"])
+
+p3 = [chain[i][:param_2] for i in 1:length(chain)]
+@show mean(p3) mean(chn["param[2][1]"])
 ```
 
-The results are as below:
-```julia
-mean(chn["param[1][1]"]) = 3.018838279341398
-mean(chm[:μ]) = 3.9580733435017885
+### Comparison 3
 
+This example compares the mean of samples generated using **Gibbs** and **AdvancedMH** sampling methods. Only one group of parameter is considered with two parameters. The proposal distribution of parameters are chosen as `MvNormal(zeros(2),1.0)`, `Normal(0.0,1.0)` respectively and sampled uisng `MH` sampler and sampled together.
+
+```julia
+
+sample_alg = Dict(
+	:n_grp => 1,
+	1 => Dict(
+		:type => :dep,
+		:n_vars => 2,
+		:alg => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1
+		)
+	)
+)
+prior = [MvNormal([2.0,3.0],1.0), Normal(4.0, 1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+
+proposalmh = [MvNormal(zeros(2),1.0), Normal(0.0,1.0)]
+model = DensityModel(logJoint)
+spl = RWMH(proposalmh)
+chain = sample(model, spl, 10000; chain_type=Vector{NamedTuple})
+
+p1 = [chain[i][:param_1][1] for i in 1:length(chain)]
+@show mean(p1) mean(chn["param[1][1]"])
+
+p2 = [chain[i][:param_1][2] for i in 1:length(chain)]
+@show mean(p2) mean(chn["param[1][2]"])
+
+p3 = [chain[i][:param_2] for i in 1:length(chain)]
+@show mean(p3) mean(chn["param[2][1]"])
+```
+
+### Comparison 4
+
+This example compares the mean of samples generated using **Gibbs** and **AdvancedMH** sampling methods. Only two groups is considered with one parameter in each group. The proposal distribution of parameters are chosen as `MvNormal(zeros(2),1.0)`, `MvNormal(zeros(3),1.0)` respectively and sampled uisng `MH` sampler and sampled together.
+
+```julia
+sample_alg = Dict(
+	:n_grp => 2,
+	1 => Dict(
+		:type => :ind,
+		:n_vars => 1,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2,
+			:alg => 1
+		)
+	),
+	2 => Dict(
+		:type => :ind,
+		:n_vars => 1,
+		1 => Dict(
+			:proposal => MvNormal(zeros(3),1.0),
+			:n_eles => 3,
+			:alg => 1
+		)
+	)
+)
+prior = [MvNormal([2.0,3.0],1.0), MvNormal([4.0,3.0, 5.0],1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+
+proposalmh = [MvNormal(zeros(2),1.0), MvNormal(zeros(3),1.0)]
+model = DensityModel(logJoint)
+spl = RWMH(proposalmh)
+chain = sample(model, spl, 10000; chain_type=Vector{NamedTuple})
+
+p1 = [chain[i][:param_1][1] for i in 1:length(chain)]
+@show mean(p1) mean(chn["param[1][1]"])
+
+p2 = [chain[i][:param_1][2] for i in 1:length(chain)]
+@show mean(p2) mean(chn["param[1][2]"])
+
+p3 = [chain[i][:param_2][1] for i in 1:length(chain)]
+@show mean(p3) mean(chn["param[2][1]"])
+
+p4 = [chain[i][:param_2][2] for i in 1:length(chain)]
+@show mean(p4) mean(chn["param[2][2]"])
+
+p5 = [chain[i][:param_2][3] for i in 1:length(chain)]
+@show mean(p5) mean(chn["param[2][3]"])
 ```

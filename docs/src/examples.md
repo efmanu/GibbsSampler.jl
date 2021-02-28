@@ -8,67 +8,54 @@ The [GibbsSampler.jl](https://github.com/efmanu/GibbsSampler.jl) allows the use 
 ### Use of AdvancedMH as MCMC sampler
 The `MH()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/GibbsSampler.jl) package is used to select MCMC sampler for each parameter in Gibbs sampling. 
 
+
 #### Example
 ```julia
+#use packages
 using GibbsSampler
 using Distributions
 
-#define prior and proposal distributions
-priors = [Normal(2.0,3.0), Normal(3.0,3.0)]
+#define MCMC samplers
+alg = [MH(), adHMC()]
 
-#log of joint probability
-function logJoint(params)	
-	logPrior= sum(logpdf.(priors, params))
-	return logPrior
-end
-alg = [MH()]
-sample_alg =Dict(
-	1 => [1, 1, Normal(2.0,3.0)],
-	2 => [1, 1, Normal(3.0,3.0)]
+#define sample_alg parameter
+sample_alg = Dict(
+	:n_grp => 2,
+	1 => Dict(
+		:type => :ind,
+		:n_vars => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2,
+			:alg => 1
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1,
+			:alg => 1
+		)
+	),
+	2 => Dict(
+		:type => :dep,
+		:n_vars => 2,
+		:alg => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(3),1.0),
+			:n_eles => 3
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1
+		)
+	)
 )
-# Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 10000, chain_type = :mcmcchain)
-```
-### Use of AdvancedHMC as MCMC sampler
-The `adHMC()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/GibbsSampler.jl) package is used to select MCMC sampler for each parameter in Gibbs sampling. 
+#define prior distribution
+prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),Normal(-1.0,1.0)]
 
-```julia
-#select MCMC sampler as vector with adHMC() struct with same length of proposal distribution
-alg = [adHMC()]
-sample_alg =Dict(
-	1 => [1],
-	2 => [1]
-)
+#define logjoint function
+logJoint(params) = sum(logpdf.(prior, params))
 
-# Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 10000, chain_type = :mcmcchain)
-```
-
-### Use of AdvancedHMC as MCMC sampler
-The `adNUTS()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/GibbsSampler.jl) package is used to select MCMC sampler for each parameter in Gibbs sampling. 
-
-```julia
-#select MCMC sampler as vector with adNUTS() struct with same length of proposal distribution
-alg = [adNUTS()]
-sample_alg =Dict(
-	1 => [1,1],
-	2 => [1,1]
-)
-
-# Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 10000, chain_type = :mcmcchain)
+#sample
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 ```
 
-### Use of different MCMC sampler for each parameter
-
-```julia
-#select MCMC sampler as vector the same length of proposal distribution
-alg = [adNUTS(), MH()]
-sample_alg =Dict(
-	1 => [1,1],
-	2 => [2, 1, Normal(0.0,1.0)]
-)
-
-# Sample from the posterior using Gibbs sampler.
-chn = GibbsSampler.gibbs(alg, sample_alg, logJoint;itr = 10000, chain_type = :mcmcchain)
-```
