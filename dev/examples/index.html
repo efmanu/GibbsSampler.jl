@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · GibbsSampler.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">GibbsSampler.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../structs/">Sampling Algorithm</a></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Different-MCMC-Samplers-for-parameter-sampling"><span>Different MCMC Samplers for parameter sampling</span></a></li></ul></li><li><a class="tocitem" href="../compare/">Comparison</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/efmanu/GibbsSampler.jl/blob/master/docs/src/examples.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><p>This section contains different examples that describes the usage of <a href="https://github.com/efmanu/GibbsSampler.jl">GibbsSampler.jl</a> package.</p><h2 id="Different-MCMC-Samplers-for-parameter-sampling"><a class="docs-heading-anchor" href="#Different-MCMC-Samplers-for-parameter-sampling">Different MCMC Samplers for parameter sampling</a><a id="Different-MCMC-Samplers-for-parameter-sampling-1"></a><a class="docs-heading-anchor-permalink" href="#Different-MCMC-Samplers-for-parameter-sampling" title="Permalink"></a></h2><p>The <a href="https://github.com/efmanu/GibbsSampler.jl">GibbsSampler.jl</a> allows the use of <strong>MH</strong>, <strong>HMC</strong>, <strong>NUTS</strong> MCMC samplers with the help of <a href="https://github.com/TuringLang/AdvancedMH.jl">AdvancedMH.jl</a> and <a href="https://github.com/TuringLang/AdvancedHMC.jl">AdvancedHMC.jl</a> package. The <code>GibbsSampler.gibbs(...)</code> function has an input corresponds to <code>alg</code>, which decides the MCMC sampler availble based on structs defined by the package (Eg: <code>MH()</code>, <code>adHMC()</code>, <code>adNUTS()</code> etc.). This algorithm need to to be mapped to parameter groups using another dictionary input <code>sample_alg</code>. The key of <code>sample_alg</code> represents the parameter group and the value vector contains the index of the sampling algorithm defined in <code>alg</code> with proposal distribution.</p><h3 id="Use-of-AdvancedMH-as-MCMC-sampler"><a class="docs-heading-anchor" href="#Use-of-AdvancedMH-as-MCMC-sampler">Use of AdvancedMH as MCMC sampler</a><a id="Use-of-AdvancedMH-as-MCMC-sampler-1"></a><a class="docs-heading-anchor-permalink" href="#Use-of-AdvancedMH-as-MCMC-sampler" title="Permalink"></a></h3><p>The <code>MH()</code> struct defined with <a href="https://github.com/efmanu/GibbsSampler.jl">GibbsSampler.jl</a> package is used to select MCMC sampler for each parameter in Gibbs sampling. </p><h4 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h4><pre><code class="language-julia">#use packages
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · GibbsSampler.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">GibbsSampler.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../structs/">Sampling Algorithm</a></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Different-MCMC-Samplers-for-parameter-sampling"><span>Different MCMC Samplers for parameter sampling</span></a></li></ul></li><li><a class="tocitem" href="../compare/">Comparison</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/efmanu/GibbsSampler.jl/blob/master/docs/src/examples.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><p>This section contains different examples that describes the usage of <a href="https://github.com/efmanu/GibbsSampler.jl">GibbsSampler.jl</a> package.</p><h2 id="Different-MCMC-Samplers-for-parameter-sampling"><a class="docs-heading-anchor" href="#Different-MCMC-Samplers-for-parameter-sampling">Different MCMC Samplers for parameter sampling</a><a id="Different-MCMC-Samplers-for-parameter-sampling-1"></a><a class="docs-heading-anchor-permalink" href="#Different-MCMC-Samplers-for-parameter-sampling" title="Permalink"></a></h2><p>The <a href="https://github.com/efmanu/GibbsSampler.jl">GibbsSampler.jl</a> allows the use of <strong>MH</strong>, <strong>HMC</strong>, <strong>NUTS</strong> MCMC samplers with the help of <a href="https://github.com/TuringLang/AdvancedMH.jl">AdvancedMH.jl</a> and <a href="https://github.com/TuringLang/AdvancedHMC.jl">AdvancedHMC.jl</a> package. The <code>GibbsSampler.gibbs(...)</code> function has an input corresponds to <code>alg</code>, which decides the MCMC sampler availble based on structs defined by the package (Eg: <code>MH()</code>, <code>adHMC()</code>, <code>adNUTS()</code> etc.). This algorithm need to to be mapped to parameter groups using another dictionary input <code>sample_alg</code>. The key of <code>sample_alg</code> represents the parameter group and the value vector contains the index of the sampling algorithm defined in <code>alg</code> with proposal distribution.</p><h3 id="Use-of-AdvancedMH-as-MCMC-sampler"><a class="docs-heading-anchor" href="#Use-of-AdvancedMH-as-MCMC-sampler">Use of AdvancedMH as MCMC sampler</a><a id="Use-of-AdvancedMH-as-MCMC-sampler-1"></a><a class="docs-heading-anchor-permalink" href="#Use-of-AdvancedMH-as-MCMC-sampler" title="Permalink"></a></h3><p>The <code>MH()</code> struct defined with <a href="https://github.com/efmanu/GibbsSampler.jl">GibbsSampler.jl</a> package is used to select MCMC sampler for each parameter in Gibbs sampling. </p><h4 id="Example-1"><a class="docs-heading-anchor" href="#Example-1">Example 1</a><a id="Example-1-1"></a><a class="docs-heading-anchor-permalink" href="#Example-1" title="Permalink"></a></h4><pre><code class="language-julia">#use packages
 using GibbsSampler
 using Distributions
 
@@ -44,4 +44,187 @@ prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),No
 logJoint(params) = sum(logpdf.(prior, params))
 
 #sample
-chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../structs/">« Sampling Algorithm</a><a class="docs-footer-nextpage" href="../compare/">Comparison »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Sunday 28 February 2021 15:50">Sunday 28 February 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)</code></pre><h4 id="Example-2"><a class="docs-heading-anchor" href="#Example-2">Example 2</a><a id="Example-2-1"></a><a class="docs-heading-anchor-permalink" href="#Example-2" title="Permalink"></a></h4><p>In this example, we defined variable <code>sample_alg</code> with a group with two sub groups. One of the subgroup sampled together and other subgroup variables sampled in parallel.</p><pre><code class="language-julia">alg = [MH(), adHMC()]
+sample_alg = Dict(
+	:n_grp =&gt; 1,
+	#grp
+	1 =&gt; Dict(		
+		:type =&gt; :ind,
+		:n_sub_grp =&gt; 2,		
+		#sub grp
+		1 =&gt; Dict(			
+			:type =&gt; :ind,
+			:n_vars =&gt; 2,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; MvNormal(zeros(2),1.0),
+				:n_eles =&gt; 2,
+				:alg =&gt; 1
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1,
+				:alg =&gt; 1
+			)
+		),
+		#sub grp
+		2 =&gt; Dict(			
+			:type =&gt; :dep,
+			:n_vars =&gt; 2,
+			:alg =&gt; 1,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; MvNormal(zeros(2),1.0),
+				:n_eles =&gt; 2,			
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1
+			)
+		)
+	)
+)
+
+prior = [MvNormal([2.0, 3.0],1.0), Normal(2.0,1.0), MvNormal([4.0,5.0],1.0), Normal(1.0,1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)</code></pre><h4 id="Example-3"><a class="docs-heading-anchor" href="#Example-3">Example 3</a><a id="Example-3-1"></a><a class="docs-heading-anchor-permalink" href="#Example-3" title="Permalink"></a></h4><p>In this example, we defined variable <code>sample_alg</code> with a group with two sub groups. Variables in both sub groups sampled together.</p><pre><code class="language-julia">sample_alg = Dict(
+	:n_grp =&gt; 1,
+	1 =&gt; Dict(		
+		:type =&gt; :dep,
+		:n_sub_grp =&gt; 2,
+		:alg =&gt; 1,		
+		#sub grp
+		1 =&gt; Dict(			
+			:n_vars =&gt; 2,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1			
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; MvNormal(zeros(3),1.0),
+				:n_eles =&gt; 3,
+			)
+		),
+		#sub grp
+		2 =&gt; Dict(			
+			:n_vars =&gt; 2,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1,				
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1,
+			)
+		)
+	)
+)
+
+prior = [Normal(3.0,1.0), MvNormal([1.0,2.0,3.0],1.0),Normal(5.0,1.0), Normal(2.0,1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+</code></pre><h4 id="Example-4"><a class="docs-heading-anchor" href="#Example-4">Example 4</a><a id="Example-4-1"></a><a class="docs-heading-anchor-permalink" href="#Example-4" title="Permalink"></a></h4><p>In this example, we defined variable <code>sample_alg</code> with 3 groups with details as follwos:</p><ul><li>Group 1: 2 Subgroups, sampled in parallel</li></ul><pre><code class="language-none">- Subgroup 1: Two variables, sampled in parallel
+- Subgroup 2: Two variables, sampled together</code></pre><ul><li>Group 2: 2 Subgroups, sampled together</li><li>Group 3; No subgroups, only two variables, sampled together</li></ul><pre><code class="language-julia">sample_alg = Dict(
+	:n_grp =&gt; 3,
+	#grp
+	1 =&gt; Dict(		
+		:type =&gt; :ind,
+		:n_sub_grp =&gt; 2,		
+		#sub grp
+		1 =&gt; Dict(			
+			:type =&gt; :ind,
+			:n_vars =&gt; 2,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; MvNormal(zeros(2),1.0),
+				:n_eles =&gt; 2,
+				:alg =&gt; 1
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1,
+				:alg =&gt; 1
+			)
+		),
+		#sub grp
+		2 =&gt; Dict(			
+			:type =&gt; :dep,
+			:n_vars =&gt; 2,
+			:alg =&gt; 1,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; MvNormal(zeros(2),1.0),
+				:n_eles =&gt; 2,			
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1
+			)
+		)
+	),
+	2 =&gt; Dict(		
+		:type =&gt; :dep,
+		:n_sub_grp =&gt; 2,
+		:alg =&gt; 1,		
+		#sub grp
+		1 =&gt; Dict(			
+			:n_vars =&gt; 2,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1			
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; MvNormal(zeros(3),1.0),
+				:n_eles =&gt; 3,
+			)
+		),
+		#sub grp
+		2 =&gt; Dict(			
+			:n_vars =&gt; 2,
+			#params
+			1 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1,				
+			),
+			#params
+			2 =&gt; Dict(
+				:proposal =&gt; Normal(0.0,1.0),
+				:n_eles =&gt; 1,
+			)
+		)
+	),
+	3 =&gt; Dict(
+		:type =&gt; :dep,
+		:n_vars =&gt; 2,
+		:alg =&gt; 1,
+		1 =&gt; Dict(
+			:proposal =&gt; MvNormal(zeros(3),1.0),
+			:n_eles =&gt; 3
+		),
+		2 =&gt; Dict(
+			:proposal =&gt; Normal(0.0,1.0),
+			:n_eles =&gt; 1
+		)
+	)
+)
+prior = [
+	MvNormal([1.0,2.0],1.0), Normal(3.0,1.0), MvNormal([4.0,5.0],1.0), Normal(4.0,1.0), 
+	Normal(3.0,1.0), MvNormal([2.0,1.0,5.0],1.0), Normal(4.0,1.0), Normal(3.0,1.0), 
+	MvNormal([4.0,2.0,1.0],1.0), Normal(3.0,1.0)
+]
+
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../structs/">« Sampling Algorithm</a><a class="docs-footer-nextpage" href="../compare/">Comparison »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 3 March 2021 11:45">Wednesday 3 March 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
