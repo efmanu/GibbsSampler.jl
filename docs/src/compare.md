@@ -191,3 +191,4 @@ p4 = [chain[i][:param_2][2] for i in 1:length(chain)]
 p5 = [chain[i][:param_2][3] for i in 1:length(chain)]
 @show mean(p5) mean(chn["param[2][3]"])
 ```
+

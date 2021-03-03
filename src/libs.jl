@@ -83,31 +83,75 @@ function reform_data(samples, initial_θ)
 		return single_vec
 	end
 end
+function find_group_var_count(sample_alg, gx)
+	g = 0
+	if  (haskey(sample_alg[gx], :n_sub_grp))
+		for sgx in 1:sample_alg[gx][:n_sub_grp]
+			g += sample_alg[gx][sgx][:n_vars]
+		end
+	elseif (haskey(sample_alg[gx], :n_vars))
+		g += sample_alg[gx][:n_vars]
+	else
+		throw("Error: No subgroups or no varibles found")
+	end	
+	return g
+end
 function find_var_count(sample_alg)
 	g = 0
 	for gx in 1:sample_alg[:n_grp]
-		g += sample_alg[gx][:n_vars]
+		if  (haskey(sample_alg[gx], :n_sub_grp))
+			for sgx in 1:sample_alg[gx][:n_sub_grp]
+				g += sample_alg[gx][sgx][:n_vars]
+			end
+		elseif (haskey(sample_alg[gx], :n_vars))
+			g += sample_alg[gx][:n_vars]
+		else
+			throw("Error: No subgroups or no varibles found")
+		end	
 	end
 	return g
 end
 function generate_ini_paramval(sample_alg)
 	param_val = []
 	param_proposal =[]
+	#foreach groups
 	for gx in 1:sample_alg[:n_grp]
-		for px in 1:sample_alg[gx][:n_vars]
-			if haskey(sample_alg[gx][px], :proposal)
-				push!(param_val, rand(sample_alg[gx][px][:proposal]))
-				push!(param_proposal,sample_alg[gx][px][:proposal])
-			else
-				if sample_alg[gx][px][:n_eles] == 1
-					push!(param_val, rand(Normal(0.0,1.0)))
-					push!(param_proposal,Normal(0.0,1.0))
-				else
-					push!(param_val, rand(MvNormal(zeros(sample_alg[gx][px][:n_eles]),1.0)))
-					push!(param_proposal,MvNormal(zeros(sample_alg[gx][px][:n_eles]),1.0))
+		if  (haskey(sample_alg[gx], :n_sub_grp))
+			for sgx in 1:sample_alg[gx][:n_sub_grp]
+				for px in 1:sample_alg[gx][sgx][:n_vars]
+					if haskey(sample_alg[gx][sgx][px], :proposal)
+						push!(param_val, rand(sample_alg[gx][sgx][px][:proposal]))
+						push!(param_proposal,sample_alg[gx][sgx][px][:proposal])
+					else
+						if sample_alg[gx][sgx][px][:n_eles] == 1
+							push!(param_val, rand(Normal(0.0,1.0)))
+							push!(param_proposal,Normal(0.0,1.0))
+						else
+							push!(param_val, rand(MvNormal(zeros(sample_alg[gx][sgx][px][:n_eles]),1.0)))
+							push!(param_proposal,MvNormal(zeros(sample_alg[gx][sgx][px][:n_eles]),1.0))
+						end
+					end			
 				end
-			end			
+			end
+		elseif (haskey(sample_alg[gx], :n_vars))
+			for px in 1:sample_alg[gx][:n_vars]
+				if haskey(sample_alg[gx][px], :proposal)
+					push!(param_val, rand(sample_alg[gx][px][:proposal]))
+					push!(param_proposal,sample_alg[gx][px][:proposal])
+				else
+					if sample_alg[gx][px][:n_eles] == 1
+						push!(param_val, rand(Normal(0.0,1.0)))
+						push!(param_proposal,Normal(0.0,1.0))
+					else
+						push!(param_val, rand(MvNormal(zeros(sample_alg[gx][px][:n_eles]),1.0)))
+						push!(param_proposal,MvNormal(zeros(sample_alg[gx][px][:n_eles]),1.0))
+					end
+				end			
+			end
+		else
+			throw("Error: No subgroups or no varibles found")
 		end
+		
 	end
 	return param_val, param_proposal
 end
