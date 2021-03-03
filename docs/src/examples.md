@@ -9,7 +9,7 @@ The [GibbsSampler.jl](https://github.com/efmanu/GibbsSampler.jl) allows the use 
 The `MH()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/GibbsSampler.jl) package is used to select MCMC sampler for each parameter in Gibbs sampling. 
 
 
-#### Example
+#### Example 1
 ```julia
 #use packages
 using GibbsSampler
@@ -56,6 +56,216 @@ prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),No
 logJoint(params) = sum(logpdf.(prior, params))
 
 #sample
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+```
+
+#### Example 2
+
+In this example, we defined variable `sample_alg` with a group with two sub groups. One of the subgroup sampled together and other subgroup variables sampled in parallel.
+
+```julia
+alg = [MH(), adHMC()]
+sample_alg = Dict(
+	:n_grp => 1,
+	#grp
+	1 => Dict(		
+		:type => :ind,
+		:n_sub_grp => 2,		
+		#sub grp
+		1 => Dict(			
+			:type => :ind,
+			:n_vars => 2,
+			#params
+			1 => Dict(
+				:proposal => MvNormal(zeros(2),1.0),
+				:n_eles => 2,
+				:alg => 1
+			),
+			#params
+			2 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1,
+				:alg => 1
+			)
+		),
+		#sub grp
+		2 => Dict(			
+			:type => :dep,
+			:n_vars => 2,
+			:alg => 1,
+			#params
+			1 => Dict(
+				:proposal => MvNormal(zeros(2),1.0),
+				:n_eles => 2,			
+			),
+			#params
+			2 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1
+			)
+		)
+	)
+)
+
+prior = [MvNormal([2.0, 3.0],1.0), Normal(2.0,1.0), MvNormal([4.0,5.0],1.0), Normal(1.0,1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+```
+#### Example 3
+
+In this example, we defined variable `sample_alg` with a group with two sub groups. Variables in both sub groups sampled together.
+
+```julia
+sample_alg = Dict(
+	:n_grp => 1,
+	1 => Dict(		
+		:type => :dep,
+		:n_sub_grp => 2,
+		:alg => 1,		
+		#sub grp
+		1 => Dict(			
+			:n_vars => 2,
+			#params
+			1 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1			
+			),
+			#params
+			2 => Dict(
+				:proposal => MvNormal(zeros(3),1.0),
+				:n_eles => 3,
+			)
+		),
+		#sub grp
+		2 => Dict(			
+			:n_vars => 2,
+			#params
+			1 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1,				
+			),
+			#params
+			2 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1,
+			)
+		)
+	)
+)
+
+prior = [Normal(3.0,1.0), MvNormal([1.0,2.0,3.0],1.0),Normal(5.0,1.0), Normal(2.0,1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+
+```
+
+#### Example 4
+
+In this example, we defined variable `sample_alg` with 3 groups with details as follwos:
+- Group 1: 2 Subgroups, sampled in parallel
+	- Subgroup 1: Two variables, sampled in parallel
+	- Subgroup 2: Two variables, sampled together
+- Group 2: 2 Subgroups, sampled together
+- Group 3; No subgroups, only two variables, sampled together
+
+```julia
+sample_alg = Dict(
+	:n_grp => 3,
+	#grp
+	1 => Dict(		
+		:type => :ind,
+		:n_sub_grp => 2,		
+		#sub grp
+		1 => Dict(			
+			:type => :ind,
+			:n_vars => 2,
+			#params
+			1 => Dict(
+				:proposal => MvNormal(zeros(2),1.0),
+				:n_eles => 2,
+				:alg => 1
+			),
+			#params
+			2 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1,
+				:alg => 1
+			)
+		),
+		#sub grp
+		2 => Dict(			
+			:type => :dep,
+			:n_vars => 2,
+			:alg => 1,
+			#params
+			1 => Dict(
+				:proposal => MvNormal(zeros(2),1.0),
+				:n_eles => 2,			
+			),
+			#params
+			2 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1
+			)
+		)
+	),
+	2 => Dict(		
+		:type => :dep,
+		:n_sub_grp => 2,
+		:alg => 1,		
+		#sub grp
+		1 => Dict(			
+			:n_vars => 2,
+			#params
+			1 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1			
+			),
+			#params
+			2 => Dict(
+				:proposal => MvNormal(zeros(3),1.0),
+				:n_eles => 3,
+			)
+		),
+		#sub grp
+		2 => Dict(			
+			:n_vars => 2,
+			#params
+			1 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1,				
+			),
+			#params
+			2 => Dict(
+				:proposal => Normal(0.0,1.0),
+				:n_eles => 1,
+			)
+		)
+	),
+	3 => Dict(
+		:type => :dep,
+		:n_vars => 2,
+		:alg => 1,
+		1 => Dict(
+			:proposal => MvNormal(zeros(3),1.0),
+			:n_eles => 3
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1
+		)
+	)
+)
+prior = [
+	MvNormal([1.0,2.0],1.0), Normal(3.0,1.0), MvNormal([4.0,5.0],1.0), Normal(4.0,1.0), 
+	Normal(3.0,1.0), MvNormal([2.0,1.0,5.0],1.0), Normal(4.0,1.0), Normal(3.0,1.0), 
+	MvNormal([4.0,2.0,1.0],1.0), Normal(3.0,1.0)
+]
+
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
 chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 ```
 
