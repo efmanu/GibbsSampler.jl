@@ -3,56 +3,41 @@ using AdvancedMH
 using MCMCChains
 using GibbsSampler
 using Distributions
-@testset "gibbs_sampling" begin
-	
-	
-	proposal = [Normal(2.0,3.0), Normal(3.0,3.0)]
-	function proposalf() 
-		return rand.(proposal)
-	end
-	priors = proposal
 
-	function logJoint(params)	
-		logPrior= sum(logpdf.(priors, params))
-		return logPrior
-	end
 
-	# Construct a DensityModel.
-	mdl = DensityModel(logJoint)
+@test "gibbs" begin
+sample_alg = Dict(
+	:n_grp => 1,
+	1 => Dict(
+		:type => :dep,
+		:n_vars => 2,
+		:alg => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1
+		)
+	)
+)
+prior = [MvNormal([2.0,3.0],1.0), Normal(4.0, 1.0)]
+logJoint(params) = sum(logpdf.(prior, params))
+#sample using gibbs sampler
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 
-	# Set up our sampler with a joint multivariate Normal proposal.
-	spl = RWMH(MvNormal([2.0,3.0],3.0))
+proposalmh = [MvNormal(zeros(2),1.0), Normal(0.0,1.0)]
+model = DensityModel(logJoint)
+spl = RWMH(proposalmh)
+chain = sample(model, spl, 10000; chain_type=Vector{NamedTuple})
 
-	# Sample from the posterior.
-	chm = sample(mdl, spl, 100000; param_names=["μ", "σ"], chain_type=Chains)
-	chn = GibbsSampler.gibbs(proposal, logJoint;itr = 100000)
-	@test isapprox(mean(Array(chn[1,2:end])),mean(chm[:μ]), atol=0.1)
-end
-@testset "gibbs_likelihood" begin
+p1 = [chain[i][:param_1][1] for i in 1:length(chain)]
+@show mean(p1) mean(chn["param[1][1]"])
 
-	proposal = [Normal(1.0,5.0), Normal(0.0,5.0)]
-	function proposalf() 
-		return rand.(proposal)
-	end
-	priors = proposal
+p2 = [chain[i][:param_1][2] for i in 1:length(chain)]
+@show mean(p2) mean(chn["param[1][2]"])
 
-	model(z) = z[1] + z[2]
-	output = 5.0
-	function logJoint1(params)	
-		logPrior= sum(logpdf.(priors, params))
-		logLikelihood = logpdf(Normal(model(params)), output)
-		return logPrior + logLikelihood
-	end
-
-	mdl1 = DensityModel(logJoint1)
-
-	# Set up our sampler with a joint multivariate Normal proposal.
-	spl1 = RWMH(MvNormal([1.0,0.0],5.0))
-
-	# Sample from the posterior.
-	chm = sample(mdl1, spl1, 100000; param_names=["μ", "σ"], chain_type=Chains)
-	chn = GibbsSampler.gibbs(proposal, logJoint1;itr = 100000)
-
-	@show mean(Array(chn[1,2:end])) mean(chm[:μ])
-	@test isapprox(mean(Array(chn[1,2:end])),mean(chm[:μ]), atol=0.5)
+p3 = [chain[i][:param_2] for i in 1:length(chain)]
+test isapprox(mean(p3),mean(chn["param[2][1]"]), atol=0.5)
 end

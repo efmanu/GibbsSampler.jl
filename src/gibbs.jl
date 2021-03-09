@@ -50,7 +50,7 @@ function gibbs(alg, sample_alg, logJoint::Function;
 	end
 	param_val, param_proposal = generate_ini_paramval(sample_alg)
 	states = Dict(
-		"itr_$(0)" => copy(param_val)
+		"itr_$(0)" => deepcopy(param_val)
 	)
 	for i in 1:itr
 		if progress
@@ -133,25 +133,33 @@ function gibbs(alg, sample_alg, logJoint::Function;
 					throw("Error: No type found")
 				end	
 			elseif (haskey(sample_alg[gx], :n_vars))
-				if sample_alg[gx][:type] == :ind
+				if sample_alg[gx][:type] == :ind			
+
 					bk_param_val = deepcopy(param_val)
-					for px in 1:sample_alg[gx][:n_vars]					
-						function step_wrapper(new_param)
-							nw_param_val =[]
-							if alg[sample_alg[gx][px][:alg]] isa MH
-								nw_param_val =deepcopy([bk_param_val[1:p_loc-1]...,new_param, bk_param_val[p_loc+1:end]...])
-							else							
-								nw_param_val = deepcopy([bk_param_val[1:p_loc-1]...,revt[p_loc](new_param), bk_param_val[p_loc+1:end]...])
+					Threads.@threads for px in 1:sample_alg[gx][:n_vars]
+						try								
+							local n_p_loc	= p_loc + px - 1
+							function step_wrapper(new_param)
+								nw_param_val =[]
+								if alg[sample_alg[gx][px][:alg]] isa MH
+									nw_param_val =deepcopy([bk_param_val[1:n_p_loc-1]...,new_param, bk_param_val[n_p_loc+1:end]...])
+								else							
+									nw_param_val = deepcopy([bk_param_val[1:n_p_loc-1]...,revt[n_p_loc](new_param), bk_param_val[n_p_loc+1:end]...])
+								end
+								return logJoint(nw_param_val)
 							end
-							return logJoint(nw_param_val)
-						end
-						initial_θ = states["itr_$(gx+(i-1)*sample_alg[:n_grp]-1)"][p_loc]
-						proposal = param_proposal[p_loc]
-						out_sample = proposal_sampling(step_wrapper, initial_θ, proposal, alg[sample_alg[gx][px][:alg]])
-						param_val[p_loc] = deepcopy(out_sample)					
-						p_loc +=1
-					end		
-					states["itr_$(gx+(i-1)*sample_alg[:n_grp])"] = copy(param_val)							
+							initial_θ = states["itr_$(gx+(i-1)*sample_alg[:n_grp]-1)"][n_p_loc]
+							proposal = param_proposal[n_p_loc]
+							out_sample = proposal_sampling(step_wrapper, initial_θ, proposal, alg[sample_alg[gx][px][:alg]])
+							param_val[n_p_loc] = deepcopy(out_sample)
+						catch e
+				           @show e 
+				       end			
+						# p_loc +=1
+					end	
+					p_loc += sample_alg[gx][:n_vars]
+
+					states["itr_$(gx+(i-1)*sample_alg[:n_grp])"] = deepcopy(param_val)							
 				elseif sample_alg[gx][:type] == :dep
 					# @show gx param_val
 					proposal = deepcopy(param_proposal[p_loc:p_loc+sample_alg[gx][:n_vars]-1])
