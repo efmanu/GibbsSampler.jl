@@ -137,23 +137,29 @@ function gibbs(alg, sample_alg, logJoint::Function;
 
 					bk_param_val = deepcopy(param_val)
 					Threads.@threads for px in 1:sample_alg[gx][:n_vars]
-						try								
-							local n_p_loc	= p_loc + px - 1
-							function step_wrapper(new_param)
-								nw_param_val =[]
-								if alg[sample_alg[gx][px][:alg]] isa MH
-									nw_param_val =deepcopy([bk_param_val[1:n_p_loc-1]...,new_param, bk_param_val[n_p_loc+1:end]...])
-								else							
-									nw_param_val = deepcopy([bk_param_val[1:n_p_loc-1]...,revt[n_p_loc](new_param), bk_param_val[n_p_loc+1:end]...])
+						try		
+							let						
+								n_p_loc	= p_loc + px - 1
+								function step_wrapper(new_param)
+									nw_param_val =[]
+									if alg[sample_alg[gx][px][:alg]] isa MH
+										nw_param_val =deepcopy([bk_param_val[1:n_p_loc-1]...,new_param, bk_param_val[n_p_loc+1:end]...])
+									else							
+										nw_param_val = deepcopy([bk_param_val[1:n_p_loc-1]...,revt[n_p_loc](new_param), bk_param_val[n_p_loc+1:end]...])
+									end
+									# if Threads.threadid() == 2
+									# 	@show nw_param_val
+									# end
+									return logJoint(nw_param_val)
 								end
-								return logJoint(nw_param_val)
+								initial_θ = states["itr_$(gx+(i-1)*sample_alg[:n_grp]-1)"][n_p_loc]
+								proposal = param_proposal[n_p_loc]								
+								out_sample = proposal_sampling(step_wrapper, initial_θ, proposal, alg[sample_alg[gx][px][:alg]])
+
+								param_val[n_p_loc] = deepcopy(out_sample)
 							end
-							initial_θ = states["itr_$(gx+(i-1)*sample_alg[:n_grp]-1)"][n_p_loc]
-							proposal = param_proposal[n_p_loc]
-							out_sample = proposal_sampling(step_wrapper, initial_θ, proposal, alg[sample_alg[gx][px][:alg]])
-							param_val[n_p_loc] = deepcopy(out_sample)
 						catch e
-				           @show e 
+				           @show i
 				       end			
 						# p_loc +=1
 					end	

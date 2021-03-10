@@ -396,11 +396,10 @@ sample_alg = Dict(
 prior = [MvNormal([2.0,3.0],1.0),Normal(-1.0,1.0)]
 
 #define logjoint function
-function logJoint(params) 
-	
+function logJoint(params)
+	@show prior
 	sumval = 0.0
 	for jk in 1:length(params)
-		@show jk typeof(prior[jk]) params[jk]
 		sumval +=logpdf(prior[jk], params[jk])
 	end
 	return sumval
