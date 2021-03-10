@@ -34,7 +34,7 @@ function extract_sample_alg(alg, sample_alg)
 	end
 	return val
 end
-function format_chain(states, burn_in, itr; chain_type=:default)
+function format_chain(states, paramnames, burn_in, itr; chain_type=:default)
 	chain =DataFrame();
 	if(!isempty(states))
 		lps = length(states["itr_1"])
@@ -42,7 +42,7 @@ function format_chain(states, burn_in, itr; chain_type=:default)
 		for ln in 1:lps
 			param_st = forward_transform(states["itr_1"][ln])
 			for ps in 1:length(param_st)
-				push!(param_names,"param[$(ln)][$(ps)]")
+				push!(param_names,string(paramnames[ln],"[$(ps)]"))
 			end			
 		end
 		chain.var = param_names
