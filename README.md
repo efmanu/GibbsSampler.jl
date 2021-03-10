@@ -4,32 +4,59 @@
 [docs-dev-url]: https://efmanu.github.io/GibbsSampler.jl/dev/
 [![][docs-dev-img]][docs-dev-url]
 
-This package helps to generate posterior samples using [Gibbs sampling algorithm](https://en.wikipedia.org/wiki/Gibbs_sampling) from a specified multivariate probability distribution when direct sampling is difficult.
-This Julia package supports MH and HMC based algorithms with different automatic differentiation backends.
+This package helps to generate posterior samples using [Gibbs sampling algorithm](https://en.wikipedia.org/wiki/Gibbs_sampling) from a specified multivariate probability distribution when direct sampling is difficult. This Julia package supports MH, HMC and NUTS based algorithms with different automatic differentiation backends.
 
 
 ## Example
 
 ```julia
 
+#use packages
 using GibbsSampler
 using Distributions
 
-#proposal distribution
-proposal = [Normal(0.0,5.0), Normal(0.0,5.0)]
+#define MCMC samplers
+alg = [MH(), adHMC()]
 
-#prior distribution
-priors = proposal
+#define sample_alg parameter
+sample_alg = Dict(
+	:n_grp => 2,
+	1 => Dict(
+		:type => :ind,
+		:n_vars => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2,
+			:alg => 1
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1,
+			:alg => 1
+		)
+	),
+	2 => Dict(
+		:type => :dep,
+		:n_vars => 2,
+		:alg => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(3),1.0),
+			:n_eles => 3
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1
+		)
+	)
+)
+#define prior distribution
+prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),Normal(-1.0,1.0)]
 
-model(z) = z[1] + z[2]
-output = 5.0
+param_names = ["α", "β", "γ", "δ"]
 
-#log joint probability
-function logJoint(params)	
-	logPrior= sum(logpdf.(priors, params))
-	logLikelihood = logpdf(Normal(model(params)), output)
-	return logPrior + logLikelihood
-end
-#sampling
-chn = GibbsSampler.gibbs(proposal, logJoint;itr = 10000)
+#define logjoint function
+logJoint(params) = sum(logpdf.(prior, params))
+
+#sample
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain, param_names = param_names)
 ```

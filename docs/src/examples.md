@@ -51,12 +51,13 @@ sample_alg = Dict(
 )
 #define prior distribution
 prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),Normal(-1.0,1.0)]
+param_names = ["α", "β", "γ", "δ"]
 
 #define logjoint function
 logJoint(params) = sum(logpdf.(prior, params))
 
 #sample
-chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain, param_names = param_names)
 ```
 
 #### Example 2
