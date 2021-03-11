@@ -2,7 +2,7 @@
 	gibbs(alg, sample_alg, logJoint::Function;  
 		revt = [reverse_transform for _ in 1:find_var_count(sample_alg)],
 		itr = 100, burn_in = Int(round(itr*sample_alg[:n_grp]*0.2)),
-		param_names = ["a$(i)" for i in 1:find_var_count(sample_alg)],
+		param_names = default_param_name(find_var_count(sample_alg)),
 		chain_type=:default, progress = true
 	) where {T <: Distribution}
 
@@ -43,7 +43,7 @@ by choosing `chain_type` as `:mcmcchain`
 function gibbs(alg, sample_alg, logJoint::Function;  
 	revt = [reverse_transform for _ in 1:find_var_count(sample_alg)],
 	itr = 100, burn_in = Int(round(itr*sample_alg[:n_grp]*0.2)),
-	param_names = ["a$(i)" for i in 1:find_var_count(sample_alg)],
+	param_names = default_param_name(find_var_count(sample_alg)),
 	chain_type=:default, progress = true
 ) where {T <: Distribution}
 	if progress

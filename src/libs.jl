@@ -162,3 +162,6 @@ function form_single_vec(param_val)
 	end
 	return single_vec
 end
+function default_param_name(var_count)
+	return ["a$(i)" for i in 1:var_count]
+end

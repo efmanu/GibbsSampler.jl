@@ -10,6 +10,7 @@ The `MH()` struct defined with [GibbsSampler.jl](https://github.com/efmanu/Gibbs
 
 
 #### Example 1
+In this example, we defined variable `sample_alg` with a group with two sub groups. One of the subgroup sampled together with HMC sampler and other subgroup variables sampled in parallel using MH sampler.
 ```julia
 #use packages
 using GibbsSampler
@@ -51,13 +52,12 @@ sample_alg = Dict(
 )
 #define prior distribution
 prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),Normal(-1.0,1.0)]
-param_names = ["α", "β", "γ", "δ"]
 
 #define logjoint function
 logJoint(params) = sum(logpdf.(prior, params))
 
 #sample
-chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain, param_names = param_names)
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 ```
 
 #### Example 2
@@ -270,3 +270,140 @@ logJoint(params) = sum(logpdf.(prior, params))
 chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 ```
 
+#### Example 5
+In this example, we defined variable `sample_alg` with a group with two sub groups. One of the subgroup sampled together with NUTS sampler and other subgroup variables sampled in parallel using MH sampler.
+```julia
+#use packages
+using GibbsSampler
+using Distributions
+
+#define MCMC samplers
+alg = [MH(), adHMC(), adNUTS()]
+
+#define sample_alg parameter
+sample_alg = Dict(
+	:n_grp => 2,
+	1 => Dict(
+		:type => :ind,
+		:n_vars => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2,
+			:alg => 1
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1,
+			:alg => 1
+		)
+	),
+	2 => Dict(
+		:type => :dep,
+		:n_vars => 2,
+		:alg => 3,
+		1 => Dict(
+			:proposal => MvNormal(zeros(3),1.0),
+			:n_eles => 3
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1
+		)
+	)
+)
+#define prior distribution
+prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),Normal(-1.0,1.0)]
+
+#define logjoint function
+logJoint(params) = sum(logpdf.(prior, params))
+
+#sample
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+```
+
+
+#### Example 6
+In this example, we defined variable `sample_alg` with a group with two sub groups. One of the subgroup sampled together with NUTS sampler with reverse differentiation backend.
+```julia
+#use packages
+using GibbsSampler
+using Distributions
+using ReverseDiff
+
+#define MCMC samplers
+alg = [MH(), adHMC(), adNUTS(backend = ReverseDiff)]
+
+#define sample_alg parameter
+sample_alg = Dict(
+	:n_grp => 1,
+	1 => Dict(
+		:type => :dep,
+		:n_vars => 2,
+		:alg => 3,
+		1 => Dict(
+			:proposal => MvNormal(zeros(3),1.0),
+			:n_eles => 3
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1
+		)
+	)
+)
+#define prior distribution
+prior = [MvNormal([2.0,4.0,3.0],1.0),Normal(-1.0,1.0)]
+
+#define logjoint function
+function  logJoint(params)
+	@show typeof(params[2]) size(params[2])
+	lpdf = identity.(logpdf.(prior, params))
+	return sum(lpdf)
+end
+
+#sample
+chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
+```
+
+#### Example 7
+In this example, we defined variable `sample_alg` ....
+```julia
+#use packages
+using GibbsSampler
+using Distributions
+using ReverseDiff
+
+#define MCMC samplers
+alg = [MH(), adHMC(), adNUTS(backend = ReverseDiff)]
+sample_alg = Dict(
+	:n_grp => 1,
+	1 => Dict(
+		:type => :ind,
+		:n_vars => 2,
+		1 => Dict(
+			:proposal => MvNormal(zeros(2),1.0),
+			:n_eles => 2,
+			:alg => 1
+		),
+		2 => Dict(
+			:proposal => Normal(0.0,1.0),
+			:n_eles => 1,
+			:alg => 1
+		)
+	)
+)
+
+#define prior distribution
+prior = [MvNormal([2.0,3.0],1.0),Normal(-1.0,1.0)]
+
+#define logjoint function
+function logJoint(params)
+	sumval = 0.0
+	for jk in 1:length(params)
+		sumval +=logpdf(prior[jk], params[jk])
+	end
+	return sumval
+end
+
+#sample
+chn = gibbs(alg, sample_alg, logJoint, itr = 200, chain_type = :mcmcchain)
+```
