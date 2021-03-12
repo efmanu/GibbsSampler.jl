@@ -24,6 +24,7 @@ sample_alg = Dict(
 )
 prior = [MvNormal([2.0,3.0],1.0), Normal(4.0, 1.0)]
 logJoint(params) = sum(logpdf.(prior, params))
+
 #sample using gibbs sampler
 chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain)
 
