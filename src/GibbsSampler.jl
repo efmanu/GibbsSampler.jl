@@ -11,6 +11,7 @@ using MCMCChains, ProgressMeter
 
 include("struct_types.jl")
 include("libs.jl")
+include("wrappers.jl")
 include("gibbs.jl")
 
 export gibbs, MH, adHMC, adNUTS
