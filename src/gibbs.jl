@@ -2,7 +2,6 @@
 	gibbs(alg, sample_alg, logJoint::Function;  
 		revt = [reverse_transform for _ in 1:find_var_count(sample_alg)],
 		itr = 100, burn_in = Int(round(itr*sample_alg[:n_grp]*0.2)),
-		param_names = default_param_name(find_var_count(sample_alg)),
 		chain_type=:default, progress = true
 	) where {T <: Distribution}
 
@@ -33,17 +32,15 @@ is the proposal distribution. This not mandatory.
 # Keyword Arguments
 - `itr` 			:Number of iterations
 - `burn_in` 		:Burn in from samples
-- `chain_type`		:Sample chain type. default value is `:default`. Samples chains formated using `MCMCChain.jl`
+- `chain_type`	:Sample chain type. default value is `:default`. Samples chains formated using `MCMCChain.jl`
 by choosing `chain_type` as `:mcmcchain`
 - `progress` 		:To show the sampling progress. Default value is `true`.
-- param_names 		:To specify parameter names
 # Output
 - `chn `			:Generated samples
 """
 function gibbs(alg, sample_alg, logJoint::Function;  
 	revt = [reverse_transform for _ in 1:find_var_count(sample_alg)],
 	itr = 100, burn_in = Int(round(itr*sample_alg[:n_grp]*0.2)),
-	param_names = default_param_name(find_var_count(sample_alg)),
 	chain_type=:default, progress = true
 ) where {T <: Distribution}
 	if progress
@@ -53,7 +50,7 @@ function gibbs(alg, sample_alg, logJoint::Function;
 	end
 	param_val, param_proposal = generate_ini_paramval(sample_alg)
 	states = Dict(
-		"itr_$(0)" => copy(param_val)
+		"itr_$(0)" => deepcopy(param_val)
 	)
 	for i in 1:itr
 		if progress
@@ -66,7 +63,7 @@ function gibbs(alg, sample_alg, logJoint::Function;
 					p_loc, param_val = grp_wrapper_indsubgrp(states, param_val, param_proposal, sample_alg, gx, revt, p_loc, alg, i, logJoint)
 					states["itr_$(gx+(i-1)*sample_alg[:n_grp])"] = deepcopy(param_val)
 				elseif sample_alg[gx][:type] == :dep
-					p_loc, param_val =  grp_wrapper_depsubgrp(states, param_val, param_proposal, sample_alg, gx, revt, p_loc, alg, i, logJoint)
+					p_loc, param_val = grp_wrapper_depsubgrp(states, param_val, param_proposal, sample_alg, gx,	revt, p_loc, alg, i, logJoint)
 					states["itr_$(gx+(i-1)*sample_alg[:n_grp])"] = deepcopy(param_val)
 				else
 					throw("Error: No type found")
@@ -74,7 +71,7 @@ function gibbs(alg, sample_alg, logJoint::Function;
 			elseif (haskey(sample_alg[gx], :n_vars))
 				if sample_alg[gx][:type] == :ind
 					p_loc, param_val = grp_wrapper_indvar(states, param_val, param_proposal, sample_alg, gx, revt, p_loc, alg, i, logJoint)		
-					states["itr_$(gx+(i-1)*sample_alg[:n_grp])"] = copy(param_val)							
+					states["itr_$(gx+(i-1)*sample_alg[:n_grp])"] = deepcopy(param_val)							
 				elseif sample_alg[gx][:type] == :dep
 					p_loc, param_val = grp_wrapper_depvar(states, param_val, param_proposal, sample_alg, gx, revt, p_loc, alg, i, logJoint)
 					states["itr_$(gx+(i-1)*sample_alg[:n_grp])"] = deepcopy(param_val)
@@ -91,7 +88,7 @@ function gibbs(alg, sample_alg, logJoint::Function;
 		ProgressMeter.finish!(prog)
 	end
 	delete!(states, "itr_0")
-	return format_chain(states, param_names, burn_in, itr*sample_alg[:n_grp], chain_type=chain_type)
+	return format_chain(states, burn_in, itr*sample_alg[:n_grp], chain_type=chain_type)
 end
 
 function proposal_sampling(step_wrapper::Function, initial_θ,

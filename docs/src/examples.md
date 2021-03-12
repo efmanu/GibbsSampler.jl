@@ -397,6 +397,7 @@ prior = [MvNormal([2.0,3.0],1.0),Normal(-1.0,1.0)]
 
 #define logjoint function
 function logJoint(params)
+
 	sumval = 0.0
 	for jk in 1:length(params)
 		sumval +=logpdf(prior[jk], params[jk])

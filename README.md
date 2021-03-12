@@ -4,11 +4,17 @@
 [docs-dev-url]: https://efmanu.github.io/GibbsSampler.jl/dev/
 [![][docs-dev-img]][docs-dev-url]
 
-This package helps to generate posterior samples using [Gibbs sampling algorithm](https://en.wikipedia.org/wiki/Gibbs_sampling) from a specified multivariate probability distribution when direct sampling is difficult. This Julia package supports MH, HMC and NUTS based algorithms with different automatic differentiation backends.
+
+This package helps to generate posterior samples using [Gibbs sampling algorithm](https://en.wikipedia.org/wiki/Gibbs_sampling) from a specified multivariate probability distribution when direct sampling is difficult.
+This Julia package supports MH, HMC and NUTS based algorithms with different automatic differentiation backends.
+
 
 
 ## Example
 
+
+
+#### Example 1
 ```julia
 
 #use packages
@@ -52,11 +58,14 @@ sample_alg = Dict(
 #define prior distribution
 prior = [MvNormal([1.0,2.0],1.0),Normal(2.0,1.0), MvNormal([2.0,4.0,3.0],1.0),Normal(-1.0,1.0)]
 
+
 param_names = ["α", "β", "γ", "δ"]
 
 #define logjoint function
 logJoint(params) = sum(logpdf.(prior, params))
 
 #sample
+
 chn = gibbs(alg, sample_alg, logJoint, itr = 10000, chain_type = :mcmcchain, param_names = param_names)
+
 ```
