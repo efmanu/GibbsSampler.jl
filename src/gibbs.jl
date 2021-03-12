@@ -32,15 +32,17 @@ is the proposal distribution. This not mandatory.
 # Keyword Arguments
 - `itr` 			:Number of iterations
 - `burn_in` 		:Burn in from samples
-- `chain_type`	:Sample chain type. default value is `:default`. Samples chains formated using `MCMCChain.jl`
+- `chain_type`		:Sample chain type. default value is `:default`. Samples chains formated using `MCMCChain.jl`
 by choosing `chain_type` as `:mcmcchain`
 - `progress` 		:To show the sampling progress. Default value is `true`.
+- `param_names` 	:To specify parameter names
 # Output
 - `chn `			:Generated samples
 """
 function gibbs(alg, sample_alg, logJoint::Function;  
 	revt = [reverse_transform for _ in 1:find_var_count(sample_alg)],
 	itr = 100, burn_in = Int(round(itr*sample_alg[:n_grp]*0.2)),
+	param_names = ["a$(i)" for i in 1:find_var_count(sample_alg)],
 	chain_type=:default, progress = true
 ) where {T <: Distribution}
 	if progress
@@ -88,7 +90,7 @@ function gibbs(alg, sample_alg, logJoint::Function;
 		ProgressMeter.finish!(prog)
 	end
 	delete!(states, "itr_0")
-	return format_chain(states, burn_in, itr*sample_alg[:n_grp], chain_type=chain_type)
+	return format_chain(states, param_names, burn_in, itr*sample_alg[:n_grp], chain_type=chain_type)
 end
 
 function proposal_sampling(step_wrapper::Function, initial_θ,
