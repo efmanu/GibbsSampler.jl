@@ -4,7 +4,7 @@ function forward_transform(x)
 end
 
 function reverse_transform(x)
-	if (length(x) == 1) && (x isa Vector)
+	if (length(x) == 1) && (x isa AbstractVector)
 		return x[1]
 	else
 		return x
